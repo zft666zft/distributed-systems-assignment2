@@ -7,6 +7,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambda_event_sources from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 
+
+
 export class PhotoGalleryStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -64,5 +66,8 @@ export class PhotoGalleryStack extends cdk.Stack {
 
     bucket.grantDelete(removeImageFn);
     removeImageFn.addEventSource(new lambda_event_sources.SqsEventSource(dlq));
+    
+
+     
   }
 }
