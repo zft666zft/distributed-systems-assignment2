@@ -7,6 +7,12 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as events from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as lambdanode from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as path from "path";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
+import { SubscriptionFilter } from "aws-cdk-lib/aws-sns";
+import * as sns from 'aws-cdk-lib/aws-sns';
+
 
 
 
@@ -76,6 +82,27 @@ export class PhotoGalleryStack extends cdk.Stack {
     bucket.grantDelete(removeImageFn);
     removeImageFn.addEventSource(new events.SqsEventSource(dlq));
 
+    const addMetadataFunction = new NodejsFunction(this, "AddMetadataFunction", {
+      entry: path.join(__dirname, "../lambdas/addMetadata.ts"),
+      environment: {
+        TABLE_NAME: table.tableName,
+      },
+    });
+    
+    table.grantWriteData(addMetadataFunction);
+    
+    // SNS Topic for metadata updates
+    const snsTopic = new sns.Topic(this, 'MetadataTopic');
+
+    snsTopic.addSubscription(
+      new subscriptions.LambdaSubscription(addMetadataFunction, {
+        filterPolicy: {
+          metadata_type: SubscriptionFilter.stringFilter({
+            allowlist: ["Caption", "Date", "Name"],
+          }),
+        },
+      })
+    );
     
 
      
