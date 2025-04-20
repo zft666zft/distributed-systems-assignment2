@@ -4,8 +4,10 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as lambda_event_sources from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
+import * as events from 'aws-cdk-lib/aws-lambda-event-sources';
+import * as lambdanode from 'aws-cdk-lib/aws-lambda-nodejs';
+
 
 
 
@@ -36,17 +38,22 @@ export class PhotoGalleryStack extends cdk.Stack {
     });
 
     // Lambda - LogImage
-    const logImageFn = new lambda.Function(this, 'LogImageFunction', {
+    const logImageFn = new lambdanode.NodejsFunction(this, 'LogImageFunction', {
       runtime: lambda.Runtime.NODEJS_16_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset('lambdas/logImage'), // Use the lambdas folder
+      entry: `${__dirname}/../lambdas/logImage.ts`,
+      handler: 'handler',
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(10),
       environment: {
         TABLE_NAME: table.tableName,
       },
     });
+    
 
     table.grantWriteData(logImageFn);
-    logImageFn.addEventSource(new lambda_event_sources.SqsEventSource(logQueue));
+    logImageFn.addEventSource(new events.SqsEventSource(logQueue));
+
+
 
     // S3 -> Send upload events to queue
     bucket.addEventNotification(
@@ -55,17 +62,20 @@ export class PhotoGalleryStack extends cdk.Stack {
     );
 
     // Lambda - RemoveImage
-    const removeImageFn = new lambda.Function(this, 'RemoveImageFunction', {
+    const removeImageFn = new lambdanode.NodejsFunction(this, 'RemoveImageFunction', {
       runtime: lambda.Runtime.NODEJS_16_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset('lambdas/removeImage'), // Use the lambdas folder
+      entry: `${__dirname}/../lambdas/removeImage.ts`,
+      handler: 'handler',
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(10),
       environment: {
         BUCKET_NAME: bucket.bucketName,
       },
     });
 
     bucket.grantDelete(removeImageFn);
-    removeImageFn.addEventSource(new lambda_event_sources.SqsEventSource(dlq));
+    removeImageFn.addEventSource(new events.SqsEventSource(dlq));
+
     
 
      
