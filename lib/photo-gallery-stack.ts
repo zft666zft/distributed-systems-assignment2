@@ -17,6 +17,7 @@ import * as sns from 'aws-cdk-lib/aws-sns';
 
 
 
+
 export class PhotoGalleryStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -103,6 +104,29 @@ export class PhotoGalleryStack extends cdk.Stack {
         },
       })
     );
+
+    const updateStatusFunction = new NodejsFunction(this, "UpdateStatusFunction", {
+      entry: path.join(__dirname, "../lambdas/updateStatus.ts"),
+      environment: {
+        TABLE_NAME: table.tableName
+      },
+    });
+    
+    table.grantWriteData(updateStatusFunction);
+    
+    snsTopic.addSubscription(
+      new subscriptions.LambdaSubscription(updateStatusFunction, {
+        filterPolicy: {
+          update: SubscriptionFilter.existsFilter(),
+        },
+      }),
+    );
+    
+    
+    
+    
+    
+    
     
 
      

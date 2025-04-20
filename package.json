@@ -22,17 +22,10 @@
     "typescript": "~5.6.3"
   },
   "dependencies": {
-    "@aws-cdk/aws-dynamodb": "^1.203.0",
-    "@aws-cdk/aws-lambda-event-sources": "^1.203.0",
-    "@aws-cdk/aws-lambda-nodejs": "^1.203.0",
-    "@aws-cdk/aws-s3": "^1.203.0",
-    "@aws-cdk/aws-s3-notifications": "^1.203.0",
-    "@aws-cdk/aws-sns": "^1.203.0",
-    "@aws-cdk/aws-sns-subscriptions": "^1.203.0",
-    "@aws-cdk/aws-sqs": "^1.203.0",
-    "@aws-sdk/client-dynamodb": "^3.788.0",
-    "aws-cdk-lib": "^2.190.0",
-    "aws-sdk": "^2.1692.0",
-    "constructs": "^10.4.2"
-  }
+  "aws-cdk-lib": "^2.190.0",
+  "constructs": "^10.4.2",
+  "@aws-sdk/client-dynamodb": "^3.788.0",
+  "aws-sdk": "^2.1692.0"
+}
+
 }
