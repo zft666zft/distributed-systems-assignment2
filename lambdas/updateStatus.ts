@@ -2,6 +2,7 @@ import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import { SNSEvent } from "aws-lambda";
 
+
 const client = new DynamoDBClient({});
 const snsClient = new SNSClient({});
 
@@ -35,5 +36,25 @@ export const handler = async (event: SNSEvent) => {
       TopicArn: process.env.MAILER_TOPIC_ARN,
       Message: JSON.stringify({ id, email }), 
     }));
+    
+    // await snsClient.send(
+    //   new PublishCommand({
+    //     TopicArn: process.env.MAILER_TOPIC_ARN!,
+    //     Message: JSON.stringify({
+    //       id,
+    //       email,
+    //       date,
+    //       update
+    //     }),
+    //     MessageAttributes: {
+    //       messageType: {
+    //         DataType: "String",
+    //         StringValue: "notify"
+    //       }
+    //     }
+    //   })
+    // );
+    
+
   }
 };

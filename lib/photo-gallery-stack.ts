@@ -22,6 +22,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 
 
 
+
 export class PhotoGalleryStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -149,6 +150,16 @@ export class PhotoGalleryStack extends cdk.Stack {
 
 
     mailerTopic.addSubscription(new subs.LambdaSubscription(mailerFunction));
+    // mailerTopic.addSubscription(
+    //   new subs.LambdaSubscription(mailerFunction, {
+    //     filterPolicy: {
+    //       messageType: sns.SubscriptionFilter.stringFilter({
+    //         allowlist: ["notify"],
+    //       }),
+    //     },
+    //   })
+    // );
+    
 
     // Permission settings: Mailer Lambda can read tables and send emails
     table.grantReadData(mailerFunction);
