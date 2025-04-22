@@ -12,6 +12,10 @@ import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import { SubscriptionFilter } from "aws-cdk-lib/aws-sns";
 import * as sns from 'aws-cdk-lib/aws-sns';
+import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
+import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
+import * as iam from "aws-cdk-lib/aws-iam";
+
 
 
 
@@ -122,7 +126,39 @@ export class PhotoGalleryStack extends cdk.Stack {
       }),
     );
     
-    
+    // Create an email notification SNS Topic
+const mailerTopic = new sns.Topic(this, "MailerTopic", {
+  displayName: "Notify Photographer of Status Update",
+});
+
+// Create an Emailing Lambda Function
+const mailerFunction = new lambdaNodejs.NodejsFunction(this, "SendStatusEmailFunction", {
+  entry: path.join(__dirname, "../lambdas/sendEmail.ts"),
+  handler: "handler",
+  runtime: lambda.Runtime.NODEJS_18_X,
+  memorySize: 1024,
+  timeout: cdk.Duration.seconds(5),
+  environment: {
+    TABLE_NAME: table.tableName,
+    SENDER_EMAIL: "20108799@mail.wit.ie", 
+  },
+});
+
+
+mailerTopic.addSubscription(new subs.LambdaSubscription(mailerFunction));
+
+// Permission settings: Mailer Lambda can read tables and send emails
+table.grantReadData(mailerFunction);
+mailerFunction.addToRolePolicy(
+  new iam.PolicyStatement({
+    actions: ["ses:SendEmail"],
+    resources: ["*"],
+  })
+);
+
+// Enable updateStatusFunction to publish SNS messages
+mailerTopic.grantPublish(updateStatusFunction);
+updateStatusFunction.addEnvironment("MAILER_TOPIC_ARN", mailerTopic.topicArn);
     
     
     
