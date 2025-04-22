@@ -1,7 +1,12 @@
 {
-    "metadata_type": {
-      "DataType": "String",
-      "StringValue": "Caption"
-    }
+  "messageType": {
+    "DataType": "String",
+    "StringValue": "metadata"
+  },
+  "metadata_type": {
+    "DataType": "String",
+    "StringValue": "Caption"
   }
-  
+}
+
+
